@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-// ── COULEURS LINGUEO ──────────────────────────────────────────────────────────
+// ── COULEURS LINGUEO ─────────────────────────────────────────────────────────
 // Bleu Lingueo #1E3A5F, Turquoise #00C9B1, Blanc, Gris clair
 
 const COLORS = {
@@ -154,7 +154,7 @@ function AgentTab({ id, label, color, active, onClick }: { id: string; label: st
   );
 }
 
-// ── PANELS ────────────────────────────────────────────────────────────────────
+// ── PANELS ───────────────────────────────────────────────────────────────────
 
 function PanelJordan({ data }: { data: DashboardData }) {
   const j = data.jordan;
@@ -410,7 +410,7 @@ function RapportPanel({ data }: { data: DashboardData }) {
   );
 }
 
-// ── APP ───────────────────────────────────────────────────────────────────────
+// ── APP ──────────────────────────────────────────────────────────────────────
 
 const AGENTS: { id: Agent | 'rapport'; label: string; color: string; icon: string }[] = [
   { id: 'jordan', label: 'Jordan', color: COLORS.jordan, icon: '🤖' },
@@ -432,7 +432,12 @@ export default function Dashboard() {
     try {
       const res = await fetch('/api/dashboard/refresh', {
         method: 'POST',
-        headers: { 'x-internal-api-key': API_KEY, 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        headers: {
+          'x-internal-api-key': API_KEY,
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
       });
       if (!res.ok) throw new Error(`Erreur ${res.status} — vérifiez que n8n est actif`);
       const json = await res.json();
