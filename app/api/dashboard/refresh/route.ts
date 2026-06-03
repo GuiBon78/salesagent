@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const N8N_WEBHOOK_URL = process.env.N8N_WEBHOOK_URL!;
 const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || '';
 
@@ -27,22 +30,44 @@ export async function POST(req: NextRequest) {
   try {
     const res = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ source: 'vercel-dashboard', triggeredAt: new Date().toISOString() }),
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+      },
+      body: JSON.stringify({
+        source: 'vercel-dashboard',
+        mode: 'full-refresh',
+        forceFresh: true,
+        scanAllDriveFiles: true,
+        triggeredAt: new Date().toISOString(),
+      }),
     });
 
     if (!res.ok) {
       const text = await res.text();
-      return NextResponse.json({ error: 'n8n error', detail: text }, { status: 502 });
+      return NextResponse.json(
+        { error: 'n8n error', detail: text },
+        { status: 502, headers: { 'Cache-Control': 'no-store, max-age=0' } },
+      );
     }
 
     const data = await res.json();
-    return NextResponse.json(data, { status: 200 });
+    return NextResponse.json(data, {
+      status: 200,
+      headers: { 'Cache-Control': 'no-store, max-age=0' },
+    });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json(
+      { error: err.message },
+      { status: 500, headers: { 'Cache-Control': 'no-store, max-age=0' } },
+    );
   }
 }
 
 export async function GET() {
-  return NextResponse.json({ status: 'ok', message: 'Use POST to trigger Jordan' });
+  return NextResponse.json(
+    { status: 'ok', message: 'Use POST to trigger Jordan' },
+    { headers: { 'Cache-Control': 'no-store, max-age=0' } },
+  );
 }
